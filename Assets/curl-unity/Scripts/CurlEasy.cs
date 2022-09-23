@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -580,7 +581,14 @@ namespace CurlUnity
                     var ms = responseBodyStream as MemoryStream;
                     if (ms != null)
                     {
-                        inData = ms.ToArray();
+                        if (inHeader.TryGetValue("Content-Encoding", out string contentEncoding))
+                        {
+                            inData = DecompressContentStream(ms, contentEncoding);
+                        }
+                        else
+                        {
+                            inData = ms.ToArray();
+                        }
                     }
 
                     if (status / 100 == 3)
@@ -613,6 +621,32 @@ namespace CurlUnity
 
 
             return done;
+        }
+
+        private byte[] DecompressContentStream(MemoryStream contentStream, string contentEncoding)
+        {
+            // 스트림을 시작부터 읽을수 있도록 위치 옮기기
+            contentStream.Seek(0, SeekOrigin.Begin);
+
+            if (contentEncoding == "gzip")
+            {
+                // https://stackoverflow.com/a/39157149/3553314                
+                using (var decompressionStream = new GZipStream(contentStream, CompressionMode.Decompress))
+                using (var outputStream = new MemoryStream())
+                {
+                    decompressionStream.CopyTo(outputStream);
+                    return outputStream.ToArray();
+                }
+            }
+            else if (contentEncoding == "")
+            {
+                return contentStream.ToArray();
+            }
+            else
+            {
+                CurlLog.LogError($"Not supported Content-Encoding: {contentEncoding}");
+                return contentStream.ToArray();
+            }
         }
 
         private void Dump()
