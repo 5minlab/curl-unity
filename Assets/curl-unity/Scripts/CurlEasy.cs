@@ -38,7 +38,7 @@ namespace CurlUnity
         public string message { get; private set; }
         public bool running { get; private set; }
         public PerformCallback performCallback { get; set; }
-        public ProgressCallback progressCallback { get; set; } 
+        public ProgressCallback progressCallback { get; set; }
         public bool debug { get; set; }
         public CurlDecoder decoder { get; set; }
 
@@ -395,7 +395,7 @@ namespace CurlUnity
                 SetOpt(CURLOPT.URL, uri.AbsoluteUri);
 
                 var upperMethod = method.ToUpper();
-                switch(upperMethod)
+                switch (upperMethod)
                 {
                     case "GET":
                         SetOpt(CURLOPT.HTTPGET, true);
@@ -413,7 +413,7 @@ namespace CurlUnity
 
                 SetOpt(CURLOPT.HTTP_VERSION, (long)HTTPVersion.VERSION_2TLS);
                 SetOpt(CURLOPT.PIPEWAIT, true);
-                
+
                 SetOpt(CURLOPT.SSL_VERIFYHOST, !insecure);
                 SetOpt(CURLOPT.SSL_VERIFYPEER, !insecure);
 
